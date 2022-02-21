@@ -1,0 +1,16 @@
+{
+    "name": "@dgoffredo/chat-server-lite",
+    "version": "0.0.0",
+    "description": "single-node chatroom server",
+    "homepage": "https://github.com/dgoffredo/chat",
+    "repository": "github:dgoffredo/chat",
+    "license": "AGPL-3.0-or-later",
+    "directories": {
+        "bin": "./bin",
+        "lib": "./lib"
+    },
+    "dependencies": {
+        "better-sqlite3": "^0.7.5",
+        "ws": "^8.5.0"
+    }
+}
