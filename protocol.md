@@ -30,6 +30,9 @@ Designates a particular user, e.g.
 Designates a particular room, e.g.
 `room:urn:uuid:f81d4fae-7dec-11d0-a765-00a0c91e6bf6`.
 
+### `profile:<path>`
+Designates a kind of field in a profile, e.g. `profile:display-name`.
+
 ## Request/Response/Event Wrapper
 ```js
 {
@@ -198,7 +201,7 @@ Schema("error:rooms/invalid")
 ### Request
 ```js
 {"command:users/profile": {
-    "profile": [Schema("profiles"), ...etc]
+    "profile": [Schema("profile"), ...etc]
 }}
 ```
 ### Response
@@ -206,14 +209,14 @@ Schema("error:rooms/invalid")
 {"event:/users/profile": {
     "server time": Date,
     "user": URI("user"),
-    "profile": [Schema("profiles"), ...etc]
+    "profile": [Schema("profile"), ...etc]
 }}
 ```
 ```js
 {"error:/users/profile/invalid": {
     "user": URI("user"),
     "errors": {
-        [URI("profiles")]: {
+        [URI("profile")]: {
             "diagnostic": String
         }
     }
@@ -232,7 +235,7 @@ Schema("error:rooms/invalid")
 ### Request
 ```js
 {"query:users/profile": {
-    "profile": [URI("profiles"), ...etc]
+    "profile": [URI("profile"), ...etc]
     "users": [URI("user"), ...etc] 
 }};
 ```
@@ -240,7 +243,7 @@ Schema("error:rooms/invalid")
 ```js
 {"answer:users/profile": {
     "profiles": {
-        [URI("user")]: [Schema("profiles"), ...etc]
+        [URI("user")]: [Schema("profile"), ...etc]
     },
     "errors": {
         [URI("user")]: [
@@ -354,4 +357,9 @@ Schema("error:rooms/unauthorized")
         [URI("room")]: Schema("error:rooms/invalid")
     }
 }}
+```
+
+## Profile Fields
+```js
+{"profile:display-name": String}
 ```
