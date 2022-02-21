@@ -7,7 +7,7 @@ Goals
 - simple
 - secure enough to actually use on the internet
 - easy to host on one node
-- possible to scale to many nodes
+- possible to host on many nodes
 - thousands of connections per node
 - complete server
 - minimal client

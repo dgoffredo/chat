@@ -51,6 +51,7 @@ Designates a particular room, e.g.
 ### Response
 ```js
 {"event:rooms/join": {
+    "server time": Date,
     "rooms": [URI("room"), ...etc]
 }}
 ```
@@ -85,6 +86,7 @@ Designates a particular room, e.g.
 ### Response
 ```js
 {"event:rooms/fork": {
+    "server time": Date,
     "parent room": URI("room"),
     "room": URI("room")
 }}
@@ -130,6 +132,7 @@ Schema("error:rooms/invalid")
 ### Response
 ```js
 {"event:rooms/relevel": {
+    "server time": Date,
     "user": URI("user"),
     "old level": or(Number, null),
     "new level": or(Number, null),
@@ -161,6 +164,7 @@ Schema("error:rooms/invalid")
 ### Response
 ```js
 {"event:rooms/subscription": {
+    "server time": Date,
     "rooms": [URI("room"), ...etc],
     "errors": {
         [URI("room")]: or(
@@ -183,8 +187,68 @@ Schema("error:rooms/invalid")
 ### Response
 ```js
 {"event:users/fork": {
+    "server time": Date,
     "user": URI("user"),
     "reset token": URI("urn:uuid")
+}}
+```
+
+`command:users/profile`
+-----------------------
+### Request
+```js
+{"command:users/profile": {
+    "profile": [Schema("profiles"), ...etc]
+}}
+```
+### Response
+```js
+{"event:/users/profile": {
+    "server time": Date,
+    "user": URI("user"),
+    "profile": [Schema("profiles"), ...etc]
+}}
+```
+```js
+{"error:/users/profile/invalid": {
+    "user": URI("user"),
+    "errors": {
+        [URI("profiles")]: {
+            "diagnostic": String
+        }
+    }
+}}
+```
+```js
+{"error:/users/profile/throttled": {
+    "user": URI("user"),
+    "actual per second": Number,
+    "maximum per second": Number
+}}
+```
+
+`query:users/profile`
+---------------------
+### Request
+```js
+{"query:users/profile": {
+    "profile": [URI("profiles"), ...etc]
+    "users": [URI("user"), ...etc] 
+}};
+```
+### Response
+```js
+{"answer:users/profile": {
+    "profiles": {
+        [URI("user")]: [Schema("profiles"), ...etc]
+    },
+    "errors": {
+        [URI("user")]: [
+            or(Schema("error:users/invalid"),
+               Schema("error:profiles/invalid")),
+            ...etc
+        ]
+    }
 }}
 ```
 
@@ -201,6 +265,7 @@ Schema("error:rooms/invalid")
 ### Response
 ```js
 {"event:rooms/post": {
+    "server time": Date,
     "room": URI("room"),
     "message": URI("message")
 }}
