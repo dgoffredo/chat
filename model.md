@@ -59,7 +59,7 @@ create table UserProfileFields(
 );
 
 -- UserProfileFieldSpecs is actually not volatile, and cannot be deduced from
--- the transition ledger.  Instead, it's a sort of "type definition."  It can
+-- the transition ledger.  Instead, it's a sort of type definition.  It can
 -- be thought of as part of the database schema.
 create table UserProfileFieldSpecs(
     fieldID text primary key not null,
@@ -80,18 +80,41 @@ create table RoomParticipants(
     roomID text not null, -- Rooms.ID
     userID text not null, -- Users.ID
     level integer,
+    participationStatus integer not null, -- ParticipationStatusSpecs.ID
     updatedWho text not null, -- Users.ID
     updatedTick integer not null,
     updatedWhen datetime not null,
 
     primary key(roomID, userID)
-    -- TODO indicies
-)
+);
+
+create index RoomParticipantsByUserID on RoomParticipants(UserID);
+
+-- ParticipationStatusSpecs is actually not volatile, and cannot be deduced from
+-- the transition ledger.  Instead, it's a sort of type definition.  It can
+-- be thought of as part of the database schema.
+--
+-- It has the following values:
+--
+--     0: Invited
+--     1: Entered Room
+--     2: Left Room
+--
+-- The following transitions are allowed:
+--
+--     0 → 1: Invitation Accepted
+--     1 → 2: Left Room
+--     2 → 1: Reentered Room
+create table ParticipationStatusSpecs(
+    ID integer primary key,
+    description text not null,
+    updatedWhen datetime not null
+);
 ```
 
 ### Message History
 Messages will outnumber other events by far, so they are stored separately, in
-such a way that they may be divided across shards and truncated behind a time
+such a way that they may be divided across shards and truncated beyond an age
 cutoff.
 ```sql
 create table Messages(
@@ -102,9 +125,9 @@ create table Messages(
     postedWhen datetime,
     MIME text not null,
     textValue text not null,
-
-    -- TODO indicies
 );
+
+create index MessageByRoomIDAndTick on Messages(roomID, tick);
 ```
 
 Storage
