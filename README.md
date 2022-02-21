@@ -12,3 +12,13 @@ Goals
 - complete server
 - minimal client
 - no XML
+
+So Far
+------
+Clients enter the system using a few HTTP [endpoints][1], and
+afterwards switch to an application specific [protocol][2] over
+[WebSockets][3].
+
+[1]: endpoints.md
+[2]: protocol.md
+[3]: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API
