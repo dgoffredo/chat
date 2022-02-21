@@ -61,6 +61,9 @@ create table UserProfileFields(
 -- UserProfileFieldSpecs is actually not volatile, and cannot be deduced from
 -- the transition ledger.  Instead, it's a sort of type definition.  It can
 -- be thought of as part of the database schema.
+--
+-- See the "Profile Fields" section of `protocol.md` for a list of supported
+-- fields and their tisch schemas.
 create table UserProfileFieldSpecs(
     fieldID text primary key not null,
     description text not null,
@@ -153,3 +156,25 @@ If message posts are handled where transitions are handled, then this is not an
 issue.  However, if message posts are handled by a different subsystem, then
 that subsystem must have access to a "feed" of ticks coming from the subsystem
 that handles transitions.
+
+Authentication
+--------------
+Authentication is mostly separate from the rest of the system, with one
+exception: When a user is forked, the new user has associated with it a
+reset token that the new user can use to set a password.  Reset tokens
+are squarely in the domain of authentication, even though user forking happens
+in the API.
+```sql
+create table AuthUsers(
+    userID text primary key not null,
+    passwordSHA256Hex text,
+    loginTokenSHA256Hex text,
+    resetTokenSHA256Hex text,
+    loginTokenExpiry datetime,
+    resetTokenExpiry datetime,
+    createdWhen datetime not null,
+    updatedPasswordWhen datetime,
+    updatedLoginTokenWhen datetime,
+    updatedResetTokenWhen datetime
+);
+```

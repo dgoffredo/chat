@@ -1,4 +1,13 @@
+API Protocol
+============
+Once a user is authenticated over HTTP, they switch to [WebSockets][1] and
+begin sending and receiving JSON messages described here.
+
 ## URI Schemes
+Each entity mentioned in the protocol (users, chat messages, request types,
+etc.) has an associated ID.  IDs are strings, and their format is that of some
+URI.  The URI schemes used are described below.
+
 ### `urn:uuid:<lower case hex with hyphens>`
 See [RFC 4122](https://www.rfc-editor.org/rfc/rfc4122.html).
 
@@ -363,3 +372,5 @@ Schema("error:rooms/unauthorized")
 ```js
 {"profile:display-name": String}
 ```
+
+[1]: https://developer.mozilla.org/en-US/docs/Web/API/WebSockets_API
