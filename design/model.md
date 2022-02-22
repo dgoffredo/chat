@@ -159,22 +159,32 @@ that handles transitions.
 
 Authentication
 --------------
-Authentication is mostly separate from the rest of the system, with one
-exception: When a user is forked, the new user has associated with it a
-reset token that the new user can use to set a password.  Reset tokens
-are squarely in the domain of authentication, even though user forking happens
-in the API.
+Authentication is mostly separate from the rest of the system, with two
+exceptions:
+
+1. When a user is forked, the new user has associated with it a reset token
+   that the new user can use to set a password.
+2. There is a `command:users/login` that associates a user with a session
+   once the WebSockets protocol has already begun as another user.  This might
+   be used in the future to implement protocol-aware proxies.
 ```sql
 create table AuthUsers(
     userID text primary key not null,
     passwordSHA256Hex text,
-    loginTokenSHA256Hex text,
     resetTokenSHA256Hex text,
-    loginTokenExpiry datetime,
     resetTokenExpiry datetime,
     createdWhen datetime not null,
     updatedPasswordWhen datetime,
-    updatedLoginTokenWhen datetime,
     updatedResetTokenWhen datetime
+);
+
+create table AuthLoginTokens(
+    userID text not null,  -- AuthUsers.userID
+    tokenSHA256Hex text not null,
+    expiry datetime not null,
+    createdWhen datetime not null,
+
+    primary key (userID, tokenSHA256Hex);
+    -- Hash/token collision?  Too bad, login again.
 );
 ```

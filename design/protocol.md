@@ -13,12 +13,21 @@ See [RFC 4122](https://www.rfc-editor.org/rfc/rfc4122.html).
 
 ### `command:<path>`
 Designates the _type_ of command, e.g. `command:rooms/join`.
+Commands are the "request" to which `response` URIs are the response.
+
+### `response:<path>`
+Designates the type of _command_ for which this is a response, i.e. each
+`<path>` corresponds to a `command:<path>`.
 
 ### `error:<path>`
 Designates the _type_ of error, e.g. `error:messages/oversized`.
+Errors are possible responses to commands.
 
 ### `event:<path>`
 Designates the _type_ of event, e.g. `event:rooms/messages`.
+Events may serve as responses to commands, but are more often "async"
+notifications of goings on, e.g. a participant joining a room or a message
+being posted to a room.
 
 ### `query:<path>`
 Designates the _type_ of query, e.g. `query:rooms/messages`
@@ -43,10 +52,16 @@ Designates a particular room, e.g.
 Designates a kind of field in a profile, e.g. `profile:display-name`.
 
 ## Request/Response/Event Wrapper
+Every message over the wire satisfies this schema, where "payload" is one of
+the objects described in the following sections.
 ```js
 {
     "ID": URI("urn:uuid"),
-    "response to?": URI("urn:uuid")
+    "user": URI("user"),
+    "response to?": {
+        "request ID": URI("urn:uuid"),
+        "final response": Boolean
+    }
     "payload": Object
 }
 ```
@@ -62,7 +77,7 @@ Designates a kind of field in a profile, e.g. `profile:display-name`.
 ```
 ### Response
 ```js
-{"event:rooms/join": {
+{"response:rooms/join": {
     "server time": Date,
     "rooms": [URI("room"), ...etc]
 }}
@@ -73,8 +88,7 @@ Designates a kind of field in a profile, e.g. `profile:display-name`.
         [URI("room")]: {
             "current level": or(Number, null),
             "required level": or(Number, null)
-        },
-        ...etc
+        }, ...etc
     }
     "diagnostic": String
 }}
@@ -97,7 +111,7 @@ Designates a kind of field in a profile, e.g. `profile:display-name`.
 ```
 ### Response
 ```js
-{"event:rooms/fork": {
+{"response:rooms/fork": {
     "server time": Date,
     "parent room": URI("room"),
     "room": URI("room")
@@ -167,15 +181,14 @@ Schema("error:rooms/invalid")
     "rooms": {
         [URI("room")]: {
             "last message?": URI("message")
-        },
-        ...etc
+        }, ...etc
     }
 }}
 ```
 
 ### Response
 ```js
-{"event:rooms/subscription": {
+{"response:rooms/subscription": {
     "server time": Date,
     "rooms": [URI("room"), ...etc],
     "errors": {
@@ -198,10 +211,43 @@ Schema("error:rooms/invalid")
 ```
 ### Response
 ```js
-{"event:users/fork": {
+{"response:users/fork": {
     "server time": Date,
     "user": URI("user"),
     "reset token": URI("urn:uuid")
+}}
+```
+
+`command:users/login`
+---------------------
+TODO: This is for future use by protocol-aware proxies.  I won't be using it at
+first, and it's subject to change.
+
+### Request
+```js
+{"command:users/login": {
+    "logins": {
+        [URI("user")]: {
+            "login token": URI("urn:uuid")
+        },
+        ...etc
+    }
+}}
+```
+### Response
+```js
+{"response:users/login": {
+    "logins": [URI("user"), ...etc],
+    "errors": {
+        [URI("user")]: or(
+            {"error:users/invalid-login-token": {
+                "user": URI("user"),
+                "diagnostic": String
+            }},
+            Schema("error:users/invalid")
+        ),
+        ...etc
+    }
 }}
 ```
 
@@ -215,7 +261,7 @@ Schema("error:rooms/invalid")
 ```
 ### Response
 ```js
-{"event:/users/profile": {
+{"response:/users/profile": {
     "server time": Date,
     "user": URI("user"),
     "profile": [Schema("profile"), ...etc]
@@ -227,7 +273,7 @@ Schema("error:rooms/invalid")
     "errors": {
         [URI("profile")]: {
             "diagnostic": String
-        }
+        }, ...etc
     }
 }}
 ```
@@ -259,7 +305,8 @@ Schema("error:rooms/invalid")
             or(Schema("error:users/invalid"),
                Schema("error:profiles/invalid")),
             ...etc
-        ]
+        ],
+        ...etc
     }
 }}
 ```
@@ -276,7 +323,7 @@ Schema("error:rooms/invalid")
 ```
 ### Response
 ```js
-{"event:rooms/post": {
+{"response:rooms/post": {
     "server time": Date,
     "room": URI("room"),
     "message": URI("message")
@@ -314,7 +361,8 @@ Schema("error:rooms/unauthorized")
             "user": URI("user"),
             "text": String,
             "MIME": String
-        }
+        },
+        ...etc
     }
 }}
 ```
@@ -331,11 +379,13 @@ Schema("error:rooms/unauthorized")
 ```js
 {"answer:rooms/participants": {
     "rooms": {
-        [URI("room")]: [{
-            [URI("user")]: {
-                "level": Number
-            }
-        }]
+        [URI("room")]: [
+            {
+                [URI("user")]: {
+                    "level": Number
+                }, ...etc
+            }, ...etc
+        ]
     },
     "errors": {
         [URI("room")]: or(
@@ -360,10 +410,11 @@ Schema("error:rooms/unauthorized")
     "rooms": {
         [URI("room")]: {
             "level": Number
-        }
+        }, ...etc
     },
     "errors": {
-        [URI("room")]: Schema("error:rooms/invalid")
+        [URI("room")]: Schema("error:rooms/invalid"),
+        ...etc
     }
 }}
 ```
