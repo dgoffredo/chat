@@ -11,7 +11,14 @@ valid login token.
 -------------
 Use [basic access authentication][1] in the request, and if successful,
 the server will set a cookie containing a login token.  A JSON message
-containing the token will also be returned as the response body.
+containing the token will also be returned as the response body:
+```js
+{
+    "user": URI("user"),
+    "login token": URI("urn:uuid"),
+    "expiry": Date
+}
+```
 
 `POST /auth/reset`
 -------------

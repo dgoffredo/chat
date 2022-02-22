@@ -188,3 +188,8 @@ create table AuthLoginTokens(
     -- Hash/token collision?  Too bad, login again.
 );
 ```
+
+Server State
+------------
+TODO: Connected clients, their logged in users, requests/response in flight,
+etc.
