@@ -12,5 +12,8 @@
     "dependencies": {
         "better-sqlite3": "^0.7.5",
         "ws": "^8.5.0"
+    },
+    "engines": {
+        "node": ">=14.16.1"
     }
 }
