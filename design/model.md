@@ -170,8 +170,8 @@ exceptions:
 ```sql
 create table AuthUsers(
     userID text primary key not null,
-    passwordSHA256Hex text,
-    resetTokenSHA256Hex text,
+    passwordSecretID integer,  -- AuthSecrets.ID
+    resetTokenSecretID integer,  -- AuthSecrets.ID
     resetTokenExpiry datetime,
     createdWhen datetime not null,
     updatedPasswordWhen datetime,
@@ -180,12 +180,25 @@ create table AuthUsers(
 
 create table AuthLoginTokens(
     userID text not null,  -- AuthUsers.userID
-    tokenSHA256Hex text not null,
+    tokenSecretID integer not null,  -- AuthSecrets.ID
     expiry datetime not null,
     createdWhen datetime not null,
 
-    primary key (userID, tokenSHA256Hex);
+    primary key (userID, tokenSecretID);
     -- Hash/token collision?  Too bad, login again.
+);
+
+create table AuthSecrets(
+    ID integer primary key not null,
+    version integer not null,  -- AuthSecretVersionSpecs.ID
+    salt blob,
+    hash blob,
+    iterations integer
+);
+
+create table AuthSecretVersionSpecs(
+    ID integer primary key not null,
+    description text
 );
 ```
 

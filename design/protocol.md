@@ -17,7 +17,7 @@ Commands are the "request" to which `response` URIs are the response.
 
 ### `response:<path>`
 Designates the type of _command_ for which this is a response, i.e. each
-`<path>` corresponds to a `command:<path>`.
+`<path>` corresponds to a `command:<path>`.  Each command has a response.
 
 ### `error:<path>`
 Designates the _type_ of error, e.g. `error:messages/oversized`.
@@ -25,9 +25,8 @@ Errors are possible responses to commands.
 
 ### `event:<path>`
 Designates the _type_ of event, e.g. `event:rooms/messages`.
-Events may serve as responses to commands, but are more often "async"
-notifications of goings on, e.g. a participant joining a room or a message
-being posted to a room.
+Events are "async" notifications of goings on, e.g. a participant joining a
+room or a message being posted to a room.
 
 ### `query:<path>`
 Designates the _type_ of query, e.g. `query:rooms/messages`
@@ -134,13 +133,20 @@ Schema("error:rooms/invalid")
 ```
 ### Response
 ```js
-{"error:rooms/nonmember": {
-    "room": URI("room"),
-    "user": URI("user")
+{"response:rooms/leave": {
+    "user": URI("user"),
+    "rooms left": [URI("room"), ...etc],
+    "errors": {
+        [URI("room")]: or(
+            {"error:rooms/nonmember": {
+                "room": URI("room"),
+                "user": URI("user")
+            }},
+        Schema("error:rooms/invalid")
+        ),
+        ...etc
+    }
 }}
-```
-```js
-Schema("error:rooms/invalid")
 ```
 
 `command:rooms/relevel`
@@ -157,7 +163,7 @@ Schema("error:rooms/invalid")
 ```
 ### Response
 ```js
-{"event:rooms/relevel": {
+{"response:rooms/relevel": {
     "server time": Date,
     "user": URI("user"),
     "old level": or(Number, null),
@@ -261,14 +267,14 @@ first, and it's subject to change.
 ```
 ### Response
 ```js
-{"response:/users/profile": {
+{"response:users/profile": {
     "server time": Date,
     "user": URI("user"),
     "profile": [Schema("profile"), ...etc]
 }}
 ```
 ```js
-{"error:/users/profile/invalid": {
+{"error:users/profile/invalid": {
     "user": URI("user"),
     "errors": {
         [URI("profile")]: {
@@ -278,7 +284,7 @@ first, and it's subject to change.
 }}
 ```
 ```js
-{"error:/users/profile/throttled": {
+{"error:users/profile/throttled": {
     "user": URI("user"),
     "actual per second": Number,
     "maximum per second": Number
